@@ -64,7 +64,7 @@ class MrDebug
     /**
      * Установка групп, для которых разрешено отображать данные.
      *
-     * @param   string|array (name1 or [string, ...])
+     * @param   string|array $names (name1 or [string, ...])
      * @throws  InvalidArgumentException
      */
 	public static function setGroups($names): void
@@ -102,7 +102,7 @@ class MrDebug
     /**
      * Установка уровня отображения информации пользователю.
      *
-     * @param   int [L_DBG, L_FULL, L_INFO, L_HEAD]
+     * @param   int $value [L_DBG, L_FULL, L_INFO, L_HEAD]
      * @throws  OutOfRangeException
      */
     public static function setLevel(int $value): void
