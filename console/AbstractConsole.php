@@ -4,9 +4,10 @@ use InvalidArgumentException;
 use RuntimeException;
 use MrDebug;
 use mrcore\services\EnvService;
+use mrcore\services\TraitServiceInjection;
 
 require_once 'mrcore/MrDebug.php';
-require_once 'mrcore/services/EnvService.php';
+require_once 'mrcore/services/TraitServiceInjection.php';
 
 /**
  * Класс обрабатывает входные параметры, поступающие с командной строки
@@ -18,6 +19,8 @@ require_once 'mrcore/services/EnvService.php';
  */
 abstract class AbstractConsole
 {
+    use TraitServiceInjection;
+
     /**
      * Типы завершения приложения.
      *
@@ -62,33 +65,36 @@ abstract class AbstractConsole
      */
     private array $_options = [];
 
-    /**
-     * Доступ к внешнему окружению.
-     *
-     * @var    EnvService
-     */
-    private EnvService $_envService;
-
     #################################### Methods #####################################
+
+    /**
+     * @inheritdoc
+     */
+    /*__override__*/ protected function _getSubscribedServices(): array
+    {
+        return array
+        (
+            'global.env' => true,
+        );
+    }
 
     /**
      * Конструктор класса.
      * Инициализация рабочего окружения для работы в консоле.
      *
-     * @param EnvService $envService
      * @param array $argv
      * @param int   $argc
      * @throws      RuntimeException
      * @throws      InvalidArgumentException
      */
-    public function __construct(EnvService $envService, array $argv, int $argc)
+    public function __construct(array $argv, int $argc)
     {
-        if (!$envService->isCli())
+        /* @var $env EnvService */ $env = &$this->injectService('global.env');
+
+        if (!$env->isCli())
         {
             throw new RuntimeException(sprintf('%s class cannot be used outside of the command line', static::class));
         }
-
-        $this->_envService = &$envService;
 
         ##################################################################################
 
