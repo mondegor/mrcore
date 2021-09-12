@@ -6,7 +6,7 @@ use Exception;
  * Exception: класс для формирования информации об ошибках связанной с БД.
  *
  * @author     Andrey J. Nazarov <mondegor@gmail.com>
- * @package    mrcore.exceptions
+ * @package    mrcore/exceptions
  */
 class DbException extends Exception
 {

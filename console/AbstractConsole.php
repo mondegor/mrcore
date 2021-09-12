@@ -2,11 +2,11 @@
 namespace mrcore\console;
 use InvalidArgumentException;
 use RuntimeException;
-use MrEnv;
 use MrDebug;
+use mrcore\services\EnvService;
 
-require_once 'mrcore/MrEnv.php';
 require_once 'mrcore/MrDebug.php';
+require_once 'mrcore/services/EnvService.php';
 
 /**
  * Класс обрабатывает входные параметры, поступающие с командной строки
@@ -14,7 +14,7 @@ require_once 'mrcore/MrDebug.php';
  * Также может принимать симолы с клавиатуры пользователя.
  *
  * @author     Andrey J. Nazarov <mondegor@gmail.com>
- * @package    mrcore.console
+ * @package    mrcore/console
  */
 abstract class AbstractConsole
 {
@@ -62,31 +62,41 @@ abstract class AbstractConsole
      */
     private array $_options = [];
 
+    /**
+     * Доступ к внешнему окружению.
+     *
+     * @var    EnvService
+     */
+    private EnvService $_envService;
+
     #################################### Methods #####################################
 
     /**
      * Конструктор класса.
      * Инициализация рабочего окружения для работы в консоле.
      *
+     * @param EnvService $envService
      * @param array $argv
      * @param int   $argc
      * @throws      RuntimeException
      * @throws      InvalidArgumentException
      */
-    public function __construct(array $argv, int $argc)
+    public function __construct(EnvService $envService, array $argv, int $argc)
     {
-		if (!MrEnv::isCli())
-		{
-		    throw new RuntimeException(sprintf('%s class cannot be used outside of the command line', self::class));
-		}
+        if (!$envService->isCli())
+        {
+            throw new RuntimeException(sprintf('%s class cannot be used outside of the command line', static::class));
+        }
+
+        $this->_envService = &$envService;
 
         ##################################################################################
 
-		for ($i = 0; $i < $argc - 1; $i++)
-		{
-			$arg = $argv[$i + 1];
+        for ($i = 0; $i < $argc - 1; $i++)
+        {
+            $arg = $argv[$i + 1];
 
-			if (0 === strncmp($arg, '--', 2))
+            if (0 === strncmp($arg, '--', 2))
             {
                 $nameAndValue = explode('=', $arg);
                 $name = ltrim($nameAndValue[0], '-');
@@ -110,16 +120,16 @@ abstract class AbstractConsole
             {
                 $this->_args[$i] = [$arg, null];
             }
-		}
+        }
 
         ##################################################################################
 
-		if (MrDebug::isGroupEnabled('mrcore:0'))
+        if (MrDebug::isGroupEnabled('mrcore:0'))
         {
-            echo sprintf("%s::\$_args:\n", self::class);
+            echo sprintf("%s::\$_args:\n", static::class);
             MrDebug::dump($this->_args);
 
-            echo sprintf("\n%s::\$_options:\n", self::class);
+            echo sprintf("\n%s::\$_options:\n", static::class);
             MrDebug::dump($this->_options);
         }
 
@@ -197,7 +207,7 @@ abstract class AbstractConsole
      * @param    int  $number
      * @return   string|null
      */
-	public function getFreeArg(int $number): ?string
+    public function getFreeArg(int $number): ?string
     {
         assert($number > 0);
 
@@ -235,15 +245,15 @@ abstract class AbstractConsole
      * @param    string  $prefix OPTIONAL
      * @return   string
      */
-	public function input(string $prefix = null): string
-	{
-	    if (null !== $prefix)
+    public function input(string $prefix = null): string
+    {
+        if (null !== $prefix)
         {
-		    echo $prefix;
+            echo $prefix;
         }
 
-		return (string)fgets(STDIN);
-	}
+        return (string)fgets(STDIN);
+    }
 
     /**
      * Проверяется, чтобы переданные опции были зарегистрированны и

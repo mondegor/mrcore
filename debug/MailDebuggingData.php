@@ -1,10 +1,9 @@
 <?php declare(strict_types=1);
 namespace mrcore\debug;
-use MrEnv;
 use mrcore\lib\mail\ISender;
+use mrcore\services\EnvService;
 
 require_once 'mrcore/Constants.php';
-require_once 'mrcore/MrEnv.php';
 require_once 'mrcore/debug/AbstractDebuggingData.php';
 require_once 'mrcore/debug/Tools.php';
 
@@ -13,13 +12,10 @@ require_once 'mrcore/debug/Tools.php';
  * отладочную информацию виде текста и отправляет её на email-ы разработчикам.
  *
  * @author     Andrey J. Nazarov <mondegor@gmail.com>
- * @package    mrcore.debug
+ * @package    mrcore/debug
  */
 class MailDebuggingData extends AbstractDebuggingData
 {
-
-    ################################### Properties ###################################
-
     /**
      * Объект отправителя сообщений.
      *
@@ -79,6 +75,8 @@ class MailDebuggingData extends AbstractDebuggingData
      */
     /*__override__*/ public function perform(int $errno, string $errstr, string $errfile, int $errline, array $backTrace): void
     {
+        /* @var $env EnvService */ $env = &$this->injectService('global.env');
+
         $sqlQuery = '';
 
         if (preg_match('/(.*) SQL Query: (.*)/', $errstr, $m) > 0)
@@ -91,13 +89,13 @@ class MailDebuggingData extends AbstractDebuggingData
 
         $errorMessage = sprintf('%s: "%s" in %s on line %s', self::getTypeError($errno), $errstr, $errfile, $errline);
 
-        $ips = MrEnv::getUserIP();
+        $ips = $env->getUserIP();
 
         $debuggingInfo = ' Date: ' . date('D, d M Y H:i:s O') . PHP_EOL .
                          (0 === $ips['ip_real'] ? '' :
-                             'Client: ' . $ips['string'] . '; URL: ' . MrEnv::getRequestUrl() . PHP_EOL .
-                             'User Agent: ' . MrEnv::getUserAgent() . PHP_EOL .
-                             'Referer URL: ' . MrEnv::getRefererUrl() . PHP_EOL) .
+                             'Client: ' . $ips['string'] . '; URL: ' . $env->getRequestUrl() . PHP_EOL .
+                             'User Agent: ' . $env->getUserAgent() . PHP_EOL .
+                             'Referer URL: ' . $env->getRefererUrl() . PHP_EOL) .
                          (empty($_REQUEST) ? '' : (' $_REQUEST = ' . rtrim(var_export(Tools::getHiddenData($_REQUEST, self::WORDS_TO_HIDE), true), ')') . " );\n")) .
                          ' ' . $errorMessage . PHP_EOL;
 
@@ -149,9 +147,11 @@ class MailDebuggingData extends AbstractDebuggingData
      */
     private function _getSubject(int $errno, string $errfile): string
     {
+        /* @var $env EnvService */ $env = &$this->injectService('global.env');
+
         $result = sprintf('%s::%s - %s', self::getTypeError($errno), basename($errfile), date('d M H:i'));
 
-        if ('' !== ($host = MrEnv::get('HTTP_HOST')))
+        if ('' !== ($host = $env->get('HTTP_HOST')))
         {
             $result = $host . ' ' . $result;
         }

@@ -1,0 +1,1 @@
+<?php $keyword = 'keywordValue'; $time = 1234567890;

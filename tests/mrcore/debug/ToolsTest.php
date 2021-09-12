@@ -77,11 +77,15 @@ class ToolsTest extends TestCase
         $this->assertEmpty(Tools::getHiddenData([], ['word1', 'word2', 'word3']));
     }
 
+    ##################################################################################
+
     public function testHiddenDataIfEmptyWords(): void
     {
         $data = ['field1' => 'value1', 'field2' => 'value2'];
         $this->assertEquals($data, Tools::getHiddenData($data, []));
     }
+
+    ##################################################################################
 
     /**
      * @dataProvider listOfHiddenDataProvider

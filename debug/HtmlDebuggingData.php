@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace mrcore\debug;
+// use mrcore\services\EnvService;
 
-// require_once 'mrcore/MrEnv.php';
 require_once 'mrcore/debug/AbstractDebuggingData.php';
 require_once 'mrcore/debug/Tools.php';
 
@@ -10,7 +10,7 @@ require_once 'mrcore/debug/Tools.php';
  * отладочную информацию виде HTML блока.
  *
  * @author     Andrey J. Nazarov <mondegor@gmail.com>
- * @package    mrcore.debug
+ * @package    mrcore/debug
  */
 class HtmlDebuggingData extends AbstractDebuggingData
 {
@@ -21,6 +21,8 @@ class HtmlDebuggingData extends AbstractDebuggingData
      */
     /*__override__*/ public function perform(int $errno, string $errstr, string $errfile, int $errline, array $backTrace): void
     {
+        // /* @var $env EnvService */ $env = &$this->injectService('global.env');
+
         $sqlQuery = '';
 
         if (preg_match('/(.*) SQL Query: (.*)/', $errstr, $m) > 0)
@@ -32,7 +34,7 @@ class HtmlDebuggingData extends AbstractDebuggingData
         $errorMessage = sprintf('%s: <i>%s</i> in <i>%s</i> on line <i>%s</i>' . PHP_EOL, self::getTypeError($errno), htmlspecialchars($errstr), $errfile, $errline);
 
         $debuggingInfo = '<font size="1"><table border="1" cellspacing="0">' . PHP_EOL .
-                         // '<tr><th style="background-color: #55ee55" colspan="3">Script URL: ' . MrEnv::getRequestUrl() . '</th></tr>' . PHP_EOL .
+                         // '<tr><th style="background-color: #55ee55" colspan="3">Script URL: ' . $env->getRequestUrl() . '</th></tr>' . PHP_EOL .
                          '<tr><th style="background-color: #ee5555" colspan="3">' . nl2br($errorMessage) . '</th></tr>' . PHP_EOL;
 
         if ('' !== $sqlQuery)

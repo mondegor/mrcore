@@ -1,19 +1,20 @@
 <?php declare(strict_types=1);
 namespace mrcore\debug;
+use mrcore\services\TraitServiceInjection;
 
 require_once 'mrcore/debug/ErrorHandler.php';
+require_once 'mrcore/services/TraitServiceInjection.php';
 
 /**
  * Класс отвечает за форматирование ошибки и связанной с ней
  * отладочной информации, а также реализация способа её передачи разработчикам.
  *
  * @author     Andrey J. Nazarov <mondegor@gmail.com>
- * @package    mrcore.debug
+ * @package    mrcore/debug
  */
 abstract class AbstractDebuggingData
 {
-
-    ################################### Properties ###################################
+    use TraitServiceInjection;
 
     /**
      * Список слов, которые нужно скрывать при записи в логи.
@@ -23,6 +24,17 @@ abstract class AbstractDebuggingData
     protected const WORDS_TO_HIDE = ['pass', 'pw'];
 
     #################################### Methods #####################################
+
+    /**
+     * @inheritdoc
+     */
+    /*__override__*/ protected function _getSubscribedServices(): array
+    {
+        return array
+        (
+            'global.env' => true,
+        );
+    }
 
     /**
      * Возвращение текста типа ошибки по её коду.

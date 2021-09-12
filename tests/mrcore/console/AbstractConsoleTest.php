@@ -1,27 +1,15 @@
 <?php declare(strict_types=1);
 namespace mrcore\console;
-use InvalidArgumentException;
+
+// :TODO: сейчас здесь функциональные тесты, нужно переделать в юнит тесты
+
 use PHPUnit\Framework\TestCase;
+use mrcore\services\EnvService;
+
+use mrcore\console\testdata\ConcreteConsole;
 
 require_once 'mrcore/console/AbstractConsole.php';
-
-class ConcreteConsole extends AbstractConsole
-{
-    /**
-     * @inheritdoc
-     */
-    protected array $_listOptions = ['option-value-off' => ['flags' => self::FLAG_OPTION_VALUE_OFF],
-                                     'option-required' => ['flags' => self::FLAG_OPTION_REQUIRED],
-                                     'option-value-required' => ['flags' => self::FLAG_OPTION_VALUE_REQUIRED],
-                                     'option-required-value-required' => ['flags' => self::FLAG_OPTION_REQUIRED + self::FLAG_OPTION_VALUE_REQUIRED],
-                                     'option-value' => ['flags' => 0],
-                                     'e' => ['flags' => self::FLAG_OPTION_VALUE_OFF],
-                                     'r' => ['flags' => self::FLAG_OPTION_REQUIRED],
-                                     'v' => ['flags' => self::FLAG_OPTION_VALUE_REQUIRED],
-                                     'a' => ['flags' => self::FLAG_OPTION_REQUIRED + self::FLAG_OPTION_VALUE_REQUIRED],
-                                     'o' => ['flags' => 0]];
-
-}
+require_once 'mrcore/services/EnvService.php';
 
 class AbstractConsoleTest extends TestCase
 {
@@ -30,6 +18,9 @@ class AbstractConsoleTest extends TestCase
      */
     public function testGetOptionForSuccessOptions(array $args, $expected): void
     {
+        $env = $this->createStub(EnvService::class);
+        $env->method('isCli')->willReturn(true);
+
         $options = [];
 
         foreach ($args as $arg)
@@ -58,7 +49,7 @@ class AbstractConsoleTest extends TestCase
             $argv[] = $arg;
         }
 
-        $console = new ConcreteConsole($argv, count($argv));
+        $console = new ConcreteConsole($env, $argv, count($argv));
 
         $this->assertSame($expected, $console->getOption(ltrim($options[0], '-')));
     }
@@ -98,6 +89,9 @@ class AbstractConsoleTest extends TestCase
      */
     public function testGetOptionForFailedOptions(array $args, $exceptionClass): void
     {
+        $env = $this->createStub(EnvService::class);
+        $env->method('isCli')->willReturn(true);
+
         $options = [];
 
         foreach ($args as $arg)
@@ -123,8 +117,9 @@ class AbstractConsoleTest extends TestCase
         }
 
         $this->expectException($exceptionClass);
-        $console = new ConcreteConsole($argv, count($argv));
-        //$console->getOption(ltrim($options[0], '-'));
+
+        $console = new ConcreteConsole($env, $argv, count($argv));
+        // $console->getOption(ltrim($options[0], '-'));
     }
 
     public function listOfFailedOptionsFromConsoleProvider(): array
@@ -153,8 +148,12 @@ class AbstractConsoleTest extends TestCase
 
     public function testgetOptionIfArgNotExists(): void
     {
+        $env = $this->createStub(EnvService::class);
+        $env->method('isCli')->willReturn(true);
+
         $args = ['test.php', '--option-required', '--option-required-value-required=1', '-r', '-a', '1'];
-        $console = new ConcreteConsole($args, count($args));
+
+        $console = new ConcreteConsole($env, $args, count($args));
 
         $this->assertNull($console->getOption('test-option'));
     }
@@ -166,6 +165,9 @@ class AbstractConsoleTest extends TestCase
      */
     public function testGetFreeArgIfParamExists(array $argv, int $number, string $expected): void
     {
+        $env = $this->createStub(EnvService::class);
+        $env->method('isCli')->willReturn(true);
+
         $args = ['test.php', '--option-required-value-required=1', '-r', '-a', '1'];
 
         foreach ($argv as $arg)
@@ -173,7 +175,7 @@ class AbstractConsoleTest extends TestCase
             $args[] = $arg;
         }
 
-        $console = new ConcreteConsole($args, count($args));
+        $console = new ConcreteConsole($env, $args, count($args));
         $this->assertEquals($expected, $console->getFreeArg($number));
     }
 

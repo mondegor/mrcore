@@ -1,5 +1,8 @@
 <?php declare(strict_types=1);
 use PHPUnit\Framework\TestCase;
+
+use mrcore\testdata\ConcreteMrDebug;
+use mrcore\testing\Helper;
 use mrcore\testing\Snapshot;
 
 require_once 'mrcore/MrDebug.php';
@@ -7,14 +10,41 @@ require_once 'mrcore/MrDebug.php';
 class MrDebugTest extends TestCase
 {
 
-    public static function setUpBeforeClass(): void
+    protected function setUp(): void
     {
         Snapshot::storeStaticProperties('MrDebug');
+        Snapshot::storeSuperglobal('$_SERVER', ['HTTP_HEADER_TEST1', 'HTTP_HEADER_TEST2', 'HEADER_TEST3']);
     }
 
-    public static function tearDownAfterClass(): void
+    protected function tearDown(): void
     {
         Snapshot::restoreAll();
+    }
+
+    ##################################################################################
+
+    public function testSetGroupsInvalidArgumentException(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        MrDebug::setGroups(['te st1']);
+    }
+
+    ##################################################################################
+
+    /**
+     * @dataProvider listOfSetLevelProvider
+     */
+    public function testSetLevelAsOutOfRangeException(int $level): void
+    {
+        $this->expectException(OutOfRangeException::class);
+        MrDebug::setLevel($level);
+    }
+
+    public function listOfSetLevelProvider(): array
+    {
+        return [
+            [-5, -1, 4, 5]
+        ];
     }
 
     ##################################################################################
@@ -24,9 +54,9 @@ class MrDebugTest extends TestCase
      */
     public function testIsGroupEnabled(string $group, int $curLevel, bool $expected): void
     {
-        MrDebug::setGroups(['test1', 'test2']);
-        MrDebug::setLevel($curLevel);
-        MrDebug::isGroupEnabled($group);
+        Helper::setStaticProperty('MrDebug', '_groups', ['test1' => true, 'test2' => true]);
+        Helper::setStaticProperty('MrDebug', '_isAllGroups', false);
+        Helper::setStaticProperty('MrDebug', '_level', $curLevel);
 
         $this->assertSame($expected, MrDebug::isGroupEnabled($group));
     }
@@ -57,37 +87,42 @@ class MrDebugTest extends TestCase
     ##################################################################################
 
     /**
-     * @dataProvider listOfSetLevelProvider
+     * @dataProvider listOfHeadersProvider
      */
-    public function testSetLevelAsOutOfRange(int $level): void
+    public function testHeaders(array $headers, array $expected): void
     {
-        $this->expectException(OutOfRangeException::class);
-        MrDebug::setLevel($level);
+        $_SERVER = array_replace($_SERVER, $headers);
+
+        $this->assertSame($expected, MrDebug::headers());
     }
 
-    public function listOfSetLevelProvider(): array
+    public function listOfHeadersProvider(): array
     {
         return [
-            [-1, 4, 5]
+            [['HTTP_HEADER_TEST1' => 'VALUE1'],
+             ['Header-Test1' => 'VALUE1']],
+
+            [['HTTP_HEADER_TEST2' => 'VALUE2', 'HEADER_TEST3' => 'VALUE3'],
+             ['Header-Test2' => 'VALUE2']],
+
+            [['HTTP_HEADER_TEST1' => 'VALUE1', 'HTTP_HEADER_TEST2' => 'VALUE2', 'HEADER_TEST3' => 'VALUE3'],
+             ['Header-Test1' => 'VALUE1', 'Header-Test2' => 'VALUE2']],
         ];
     }
 
     ##################################################################################
 
     /**
-     * @dataProvider listOfPackageFilterProvider
+     * @dataProvider listOfProtectedPackageFilterProvider
      */
-    public function testPackageFilter(array $classes, array $packages, array $expected): void
+    public function testProtectedPackageFilter(array $classes, array $packages, array $expected): void
     {
-        // хитрый способ обращения к приватному методу класса
-        $packageFilter = (static function ($classes, $packages) {
-            return self::_packageFilter($classes, $packages);
-        })->bindTo(null, MrDebug::class);
+        $mrDebug = $this->createPartialMock(ConcreteMrDebug::class, []);
 
-        $this->assertEquals($expected, $packageFilter($classes, $packages));
+        $this->assertEquals($expected, $mrDebug->testProtectedPackageFilter($classes, $packages));
     }
 
-    public function listOfPackageFilterProvider(): array
+    public function listOfProtectedPackageFilterProvider(): array
     {
         return [
             [['package1\Class1', 'package2\Class2', 'package3\Class3', 'package1Class1'],

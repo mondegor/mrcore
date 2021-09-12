@@ -14,7 +14,7 @@ require_once 'mrcore/debug/Tools.php';
  * @package    mrcore
  * @uses       $_SERVER
  */
-class MrDebug
+/*__class_static__*/ class MrDebug
 {
     /**
      * Специальная группа, при которой разрешен
@@ -50,7 +50,7 @@ class MrDebug
      *
      * @var  array [string, ...]
      */
-    private static array $_groups = array();
+    private static array $_groups = [];
 
     /**
      * Текущий уровень отображения информации.
@@ -64,7 +64,7 @@ class MrDebug
     /**
      * Установка групп, для которых разрешено отображать данные.
      *
-     * @param   string|array (name1 or [string, ...])
+     * @param   string|array $names (name1 or [string, ...])
      * @throws  InvalidArgumentException
      */
 	public static function setGroups($names): void
@@ -83,7 +83,7 @@ class MrDebug
         {
             if (!is_string($name) || preg_match('/^[a-z0-9.\-_]+$/i', $name) <= 0)
             {
-                throw new InvalidArgumentException(sprintf('The group name "%s" is incorrect in %s', $name, self::class));
+                throw new InvalidArgumentException(sprintf('The group name "%s" is incorrect in %s', $name, static::class));
             }
 
             if (self::GROUP_ALL === $name)
@@ -102,14 +102,14 @@ class MrDebug
     /**
      * Установка уровня отображения информации пользователю.
      *
-     * @param   int [L_DBG, L_FULL, L_INFO, L_HEAD]
+     * @param   int $value [L_DBG, L_FULL, L_INFO, L_HEAD]
      * @throws  OutOfRangeException
      */
     public static function setLevel(int $value): void
     {
         if ($value < self::L_DBG || $value > self::L_HEAD)
         {
-            throw new OutOfRangeException(sprintf('Level %d out of range in %s', $value, self::class));
+            throw new OutOfRangeException(sprintf('Level %d out of range in %s', $value, static::class));
         }
 
         self::$_level = $value;
@@ -134,7 +134,7 @@ class MrDebug
 
         if (preg_match('/^([a-z0-9.\-_]+)(?::([0123]))?$/i', $name, $m) <= 0)
         {
-            throw new RuntimeException(sprintf('Group name "%s" is incorrect in %s', $name, self::class));
+            throw new RuntimeException(sprintf('Group name "%s" is incorrect in %s', $name, static::class));
         }
 
         $groupName = $m[1];
@@ -218,86 +218,86 @@ class MrDebug
 
     ##################################################################################
 
-	/**
-	 * Prints a list of all currently declared classes.
+    /**
+     * Prints a list of all currently declared classes.
      *
      * @param   string|array $packages OPTIONAL
-	 */
-	public static function classes($packages = null): void
-	{
-		var_dump(self::_packageFilter(get_declared_classes(), $packages));
-	}
+     */
+    public static function classes($packages = null): void
+    {
+        var_dump(static::_packageFilter(get_declared_classes(), $packages));
+    }
 
-	/**
-	 * Prints a list of all currently declared interfaces.
+    /**
+     * Prints a list of all currently declared interfaces.
      *
      * @param   string|array $packages OPTIONAL
-	 */
-	public static function interfaces($packages = null): void
-	{
-		var_dump(self::_packageFilter(get_declared_interfaces(), $packages));
-	}
+     */
+    public static function interfaces($packages = null): void
+    {
+        var_dump(static::_packageFilter(get_declared_interfaces(), $packages));
+    }
 
-	/**
-	 * Prints a list of all currently declared traits.
+    /**
+     * Prints a list of all currently declared traits.
      *
      * @param   string|array $packages OPTIONAL
-	 */
-	public static function traits($packages = null): void
-	{
-		var_dump(self::_packageFilter(get_declared_traits(), $packages));
-	}
+     */
+    public static function traits($packages = null): void
+    {
+        var_dump(static::_packageFilter(get_declared_traits(), $packages));
+    }
 
-	/**
-	 * Prints a list of all currently included (or required) files.
-	 */
-	public static function includes(): void
-	{
+    /**
+     * Prints a list of all currently included (or required) files.
+     */
+    public static function includes(): void
+    {
         var_dump(get_included_files());
-	}
+    }
 
-	///**
-	// * Prints a list of all currently declared functions.
-	// */
-	//public static function functions(): void
-	//{
+    ///**
+    // * Prints a list of all currently declared functions.
+    // */
+    //public static function functions(): void
+    //{
     //    var_dump(get_defined_functions(true));
-	//}
+    //}
 
-	/**
-	 * Prints a list of all currently declared constants.
-	 */
-	public static function constants(): void
-	{
+    /**
+     * Prints a list of all currently declared constants.
+     */
+    public static function constants(): void
+    {
         var_dump(get_defined_constants());
-	}
+    }
 
-	/**
-	 * Prints a list of all currently loaded PHP extensions.
-	 */
-	public static function extensions(): void
-	{
+    /**
+     * Prints a list of all currently loaded PHP extensions.
+     */
+    public static function extensions(): void
+    {
         var_dump(get_loaded_extensions());
-	}
+    }
 
-	/**
-	 * Prints a list of all HTTP request headers.
-	 */
-	public static function headers(): void
-	{
-       $headers = [];
+    /**
+     * Prints a list of all HTTP request headers.
+     */
+    public static function headers(): array
+    {
+        $headers = [];
 
-       foreach ($_SERVER as $name => $value)
-       {
-           if (0 === strncmp($name, 'HTTP_', 5))
-           {
-               // HTTP_CONTENT_TYPE -> Content-Type
-               $headers[strtr(ucwords(strtolower(strtr(substr($name, 5), '_', ' '))), ' ', '-')] = $value;
-           }
-       }
+        foreach ($_SERVER as $name => $value)
+        {
+            if (0 === strncmp($name, 'HTTP_', 5))
+            {
+                // HTTP_CONTENT_TYPE -> Content-Type
+                $headers[strtr(ucwords(strtolower(strtr(substr($name, 5), '_', ' '))), ' ', '-')] = $value;
+            }
+        }
 
-       var_dump($headers);
-	}
+        return $headers;
+    }
 
     ##################################################################################
 
@@ -309,7 +309,7 @@ class MrDebug
      * @param       string|array $packages
      * @return      array
      */
-	private static function _packageFilter(array $classes, $packages): array
+	/*__private__*/protected static function _packageFilter(array $classes, $packages): array
 	{
 	    assert(null === $packages || is_string($packages) || is_array($packages));
 
@@ -318,7 +318,7 @@ class MrDebug
             return $classes;
         }
 
-        $packages = (array)($packages);
+        $packages = (array)$packages;
 
 	    return array_filter
 	    (

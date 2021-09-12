@@ -10,7 +10,7 @@ require_once 'mrcore/debug/Tools.php';
  * отладочную информацию виде текста.
  *
  * @author     Andrey J. Nazarov <mondegor@gmail.com>
- * @package    mrcore.debug
+ * @package    mrcore/debug
  */
 class TextDebuggingData extends AbstractDebuggingData
 {

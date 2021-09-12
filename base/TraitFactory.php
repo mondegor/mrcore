@@ -11,13 +11,10 @@ use RuntimeException;
  *           свойства $_defaultNamespace, шаблон данного свойства указан ниже
  *
  * @author     Andrey J. Nazarov <mondegor@gmail.com>
- * @package    mrcore.base
+ * @package    mrcore/base
  */
 trait TraitFactory
 {
-
-    ################################### Properties ###################################
-
     /**
      * Namespace по умолчанию используемой в TraitFactory::factory(),
      * для подстановки в $source если в нём не был указан свой namespace.
@@ -57,11 +54,11 @@ trait TraitFactory
             throw new RuntimeException(sprintf('Class %s is not found', $source));
         }
 
-        $result = new $source($params);
+        $result = new $source(...$params);
 
         if (!($result instanceof self))
         {
-            throw new RuntimeException(sprintf('The created object of class %s is not an inheritor of class %s', get_class($result), self::class));
+            throw new RuntimeException(sprintf('The created object of class %s is not an inheritor of class %s', get_class($result), static::class));
         }
 
         return $result;

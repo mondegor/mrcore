@@ -1,9 +1,8 @@
 <?php declare(strict_types=1);
 namespace mrcore\debug;
-use MrEnv;
+use mrcore\services\EnvService;
 
 require_once 'mrcore/Constants.php';
-require_once 'mrcore/MrEnv.php';
 require_once 'mrcore/debug/AbstractDebuggingData.php';
 require_once 'mrcore/debug/Tools.php';
 
@@ -12,13 +11,10 @@ require_once 'mrcore/debug/Tools.php';
  * отладочную информацию виде текста и записывает её в лог файл.
  *
  * @author     Andrey J. Nazarov <mondegor@gmail.com>
- * @package    mrcore.debug
+ * @package    mrcore/debug
  */
 class FileDebuggingData extends AbstractDebuggingData
 {
-
-    ################################### Properties ###################################
-
     /**
      * Имя лог-файла куда будут сохранятся сообщения об ошибках.
      *
@@ -61,6 +57,8 @@ class FileDebuggingData extends AbstractDebuggingData
      */
     /*__override__*/ public function perform(int $errno, string $errstr, string $errfile, int $errline, array $backTrace): void
     {
+        /* @var $env EnvService */ $env = &$this->injectService('global.env');
+
         $sqlQuery = '';
 
         if (preg_match('/(.*) SQL Query: (.*)/', $errstr, $m) > 0)
@@ -73,13 +71,13 @@ class FileDebuggingData extends AbstractDebuggingData
 
         $errorMessage = sprintf('%s: "%s" in %s on line %s', self::getTypeError($errno), $errstr, $errfile, $errline);
 
-        $ips = MrEnv::getUserIP();
+        $ips = $env->getUserIP();
 
         $debuggingInfo = MRCORE_LINE_DOUBLE .
                          (0 === $ips['ip_real'] ? '' :
-                             'Client: ' . $ips['string'] . '; URL: ' . MrEnv::getRequestUrl() . PHP_EOL .
-                             'User Agent: ' . MrEnv::getUserAgent() . PHP_EOL .
-                             'Referer URL: ' . MrEnv::getRefererUrl() . PHP_EOL) .
+                             'Client: ' . $ips['string'] . '; URL: ' . $env->getRequestUrl() . PHP_EOL .
+                             'User Agent: ' . $env->getUserAgent() . PHP_EOL .
+                             'Referer URL: ' . $env->getRefererUrl() . PHP_EOL) .
                          (empty($_REQUEST) ? '' : (' $_REQUEST = ' . rtrim(var_export(Tools::getHiddenData($_REQUEST, self::WORDS_TO_HIDE), true), ')') . " );\n")) .
                          ' ' . $errorMessage . PHP_EOL;
 

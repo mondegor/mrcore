@@ -11,7 +11,7 @@ use Throwable;
  * в качестве обработчиков ошибок и исключений.
  *
  * @author     Andrey J. Nazarov <mondegor@gmail.com>
- * @package    mrcore.debug
+ * @package    mrcore/debug
  */
 class ErrorHandler
 {

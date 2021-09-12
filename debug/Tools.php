@@ -6,9 +6,9 @@ use ReflectionObject;
  * Набор методов используемых при отладке программы.
  *
  * @author     Andrey J. Nazarov <mondegor@gmail.com>
- * @package    mrcore.debug
+ * @package    mrcore/debug
  */
-/*__class_static__*/ final class Tools
+/*__class_static__*/ class Tools
 {
     /**
      * Преобразование переменной в текстовое представление.
@@ -63,7 +63,7 @@ use ReflectionObject;
                             break;
                         }
 
-                        $values .= ($isIndexed ? '' : $key . ' => ') . ($maxDeep > 0 ? self::var2str($value, 0, $maxDeep - 1) : '[MAX_DEEP]') . ', ';
+                        $values .= ($isIndexed ? '' : $key . ' => ') . ($maxDeep > 0 ? static::var2str($value, 0, $maxDeep - 1) : '[MAX_DEEP]') . ', ';
                     }
 
                     $result = sprintf('array(%u) {%s}', $cnt, substr($values, 0, -2));
@@ -135,7 +135,7 @@ use ReflectionObject;
 
             foreach ($args as $arg)
             {
-                $result .= self::var2str($arg, $number++) . ', ';
+                $result .= static::var2str($arg, $number++) . ', ';
             }
 
             $result = substr($result, 0, -2);
@@ -154,7 +154,7 @@ use ReflectionObject;
      */
     public static function getHiddenData(array $data, array $words): array
     {
-        self::hideData($data, $words);
+        static::hideData($data, $words);
 
         return $data;
     }
@@ -167,7 +167,7 @@ use ReflectionObject;
      * @param      int    $maxDeep - защита от ссылок в массивах
      * @return     bool
      */
-    public static function hideData(array &$data, array $words, int $maxDeep = 8): bool
+    /*__private__*/protected static function hideData(array &$data, array $words, int $maxDeep = 8): bool
     {
         if (empty($data) || empty($words))
         {
@@ -180,7 +180,7 @@ use ReflectionObject;
         {
             if (is_array($item))
             {
-                if ($maxDeep > 0 && self::hideData($item, $words, $maxDeep - 1))
+                if ($maxDeep > 0 && static::hideData($item, $words, $maxDeep - 1))
                 {
                     $isChanged = true;
                 }

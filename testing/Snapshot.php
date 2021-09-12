@@ -7,7 +7,7 @@ use MrDebug;
 
 require_once 'mrcore/MrDebug.php';
 
-class Snapshot
+/*__class_static__*/ final class Snapshot
 {
 
     private static array $snapshots = [

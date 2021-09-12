@@ -9,13 +9,10 @@ require_once 'mrcore/debug/AbstractDebuggingData.php';
  * ошибок и связанной с ними отладочной информации.
  *
  * @author     Andrey J. Nazarov <mondegor@gmail.com>
- * @package    mrcore.debug
+ * @package    mrcore/debug
  */
 class DebuggingDataProvider extends AbstractDebuggingData
 {
-
-    ################################### Properties ###################################
-
     /**
      * Флаг отладочного режима (true - включен, false - отключен).
      *
