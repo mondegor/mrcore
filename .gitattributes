@@ -1,9 +1,11 @@
 # Files and directories with the attribute export-ignore won't be added to archive files
 # (such as zips/tarballs in GitHub Releases)
 
-/testing         export-ignore
+/.gitattributes  export-ignore
+/.gitignore      export-ignore
+/CHANGELOG.md    export-ignore
+/LICENSE         export-ignore
+/README.md       export-ignore
+/composer.json   export-ignore
 /tests           export-ignore
-.gitattributes   export-ignore
-.gitignore       export-ignore
-CHANGELOG.md     export-ignore
-README.md        export-ignore
+/src/testing     export-ignore
