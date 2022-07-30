@@ -6,7 +6,8 @@
     "authors": [
         {
             "name": "mondegor",
-            "homepage": "https://github.com/mondegor/"
+            "homepage": "https://github.com/mondegor/",
+            "role": "Developer"
         }
     ],
     "require": {
@@ -19,7 +20,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "1.x-dev"
+            "dev-master": "1.0-dev"
         }
     }
 }
